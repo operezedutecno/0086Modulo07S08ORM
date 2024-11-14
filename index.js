@@ -9,9 +9,15 @@ createServer(async (request, response) => {
     const path = urlParsed.pathname;
     const method = request.method;
 
-    // console.log(urlParsed);
+    console.log(urlParsed);
 
     response.setHeader("Content-type","application/json");
+
+    if(method == 'GET' && path == '/libro/listar') {
+        const libro = new Libro();
+        const result = await libro.listar();
+        return response.end(JSON.stringify({ "message": "Libros registrados", data: result}));
+    }
 
     if(method == 'GET' && path == '/libro/describir') {
         const id = urlParsed.query.id;

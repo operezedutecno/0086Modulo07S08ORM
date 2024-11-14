@@ -79,6 +79,11 @@ class Libro {
         return true
     }
 
+    async listar() {
+        const result = await conexion.query("SELECT * FROM libros ORDER BY titulo ASC");
+        return result.rows;
+    }
+
     // Accesadores y mutadores (Getters y Setters)
     get titulo() {
         return this._titulo
