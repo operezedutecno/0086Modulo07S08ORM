@@ -12,32 +12,41 @@ class Libro {
 
     // Métodos personalizados.
     async describir() {
-        await this.consultar();
+        const consulta = await this.consultar();
+        if(!consulta) {
+            return null
+        }
         const descripcion = `Titulo: ${this._titulo}, Autor: ${this._autor}, Año: ${this._anio}, Disponible: ${this._disponible ? 'Si' : 'No'}`
         return descripcion;
     }
 
     async prestar() {
-        await this.consultar();
+        const consulta = await this.consultar();
+
+        if(!consulta) {
+            return { message: "Libro no existente", code: 404 }
+        }
 
         if(!this._disponible) {
-            console.log("Libro no disponible");
-            return false
+            return { message: "Libro no disponible", code: 422 }
         }
         const argumentos = {
             text:"UPDATE libros SET disponible=false WHERE id=$1 RETURNING *",
             values: [this._id]
         };
         const result = await conexion.query(argumentos);
-        console.log("Libro prestado exitosamente");
-        return result.rows
+        return { message: "Libro prestado exitosamente", code: 200 }
     }
 
     async devolver() {
-        await this.consultar();
+        const consulta = await this.consultar();
+
+        if(!consulta) {
+            return { message: "Libro no existente", code: 404 }
+        }
+
         if(this._disponible) {
-            console.log("Imposible devolver, el libro se encuentra disponible");
-            return false;
+            return { message: "Imposible devolver, el libro se encuentra disponible", code: 422 }
         }
 
         const argumentos = {
@@ -45,8 +54,7 @@ class Libro {
             values: [this._id]
         };
         const result = await conexion.query(argumentos);
-        console.log("Libro devuelto con éxito");
-        return result.rows;
+        return { message: "Libro devuelto con éxito", code: 200 }
 
     }
 
@@ -68,6 +76,7 @@ class Libro {
         this._anio = libro.anio;
         this._autor = libro.autor;
         this._disponible = libro.disponible;
+        return true
     }
 
     // Accesadores y mutadores (Getters y Setters)
