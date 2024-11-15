@@ -9,7 +9,7 @@ createServer(async (request, response) => {
     const path = urlParsed.pathname;
     const method = request.method;
 
-    console.log(urlParsed);
+    // console.log(urlParsed);
 
     response.setHeader("Content-type","application/json");
 
@@ -45,7 +45,6 @@ createServer(async (request, response) => {
         })
     }
 
-
     if(method == 'POST' && path == '/libro/devolver') {
         let body = "";
         request.on("data", (chunk) => {
@@ -54,11 +53,49 @@ createServer(async (request, response) => {
 
         return request.on("end", async () => {
             body = JSON.parse(body);
-            const libro = new Libro(body.id)
+            const libro = new Libro(body.id);
             const result = await libro.devolver();
             response.writeHead(result.code);
             return response.end(JSON.stringify({ "message": result.message }));
         })
+    }
+
+    if(method == 'POST' && path == '/libro/registrar') {
+        let body = "";
+        request.on("data", (chunk) =>{
+            body += chunk.toString();
+        })
+
+        return request.on("end", async () => {
+            body = JSON.parse(body);
+
+            const libro = new Libro(null, body.titulo, body.autor, body.anio);
+            
+            if(!(await libro.validarRegistro())) {
+                response.writeHead(409);
+                return response.end(JSON.stringify({message: "Libro registrado previamente"}))
+            }
+
+
+            const [result] = await libro.registrar();
+            return response.end(JSON.stringify({ message: "Libro registrado exitosamente", data: result }))
+        })
+        
+    }
+
+    if(method == 'PUT' && path == '/libro/editar') {
+        let body = "";
+        request.on("data", (chunk) =>{
+            body += chunk.toString();
+        })
+
+        return request.on("end", async () => {
+            body = JSON.parse(body);
+            const libro = new Libro(urlParsed.query.id, body.titulo, body.autor, body.anio);
+            const [result] = await libro.editar();
+            return response.end(JSON.stringify({ message: "Libro editado exitosamente", data: result }))
+        })
+        
     }
     
     

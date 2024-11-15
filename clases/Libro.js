@@ -67,6 +67,24 @@ class Libro {
         return result.rows;
     }
 
+    async editar() {
+        const argumentos = {
+            text:"UPDATE libros SET titulo=$1, autor=$2, anio=$3 WHERE id=$4 RETURNING *",
+            values: [this._titulo, this._autor, this._anio, this._id]
+        }
+        const result = await conexion.query(argumentos);
+        return result.rows;
+    }
+
+    async validarRegistro() {
+        const argumentos = {
+            text:"SELECT * FROM libros WHERE titulo=$1 AND anio=$3 AND autor=$2",
+            values: [this._titulo, this._autor, this._anio]
+        };
+        const result = await conexion.query(argumentos);
+        return result.rowCount == 0;
+    }
+
     async consultar() {
         const result = await conexion.query("SELECT * FROM libros WHERE id=$1",[this._id]);
         if(result.rowCount == 0)
