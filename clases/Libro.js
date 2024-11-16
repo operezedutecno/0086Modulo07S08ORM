@@ -85,6 +85,15 @@ class Libro {
         return result.rowCount == 0;
     }
 
+    async validarActualizacion() {
+        const argumentos = {
+            text:"SELECT * FROM libros WHERE titulo=$1 AND anio=$3 AND autor=$2 AND id <> $4",
+            values: [this._titulo, this._autor, this._anio, this._id]
+        };
+        const result = await conexion.query(argumentos);
+        return result.rowCount == 0;
+    }
+
     async consultar() {
         const result = await conexion.query("SELECT * FROM libros WHERE id=$1",[this._id]);
         if(result.rowCount == 0)

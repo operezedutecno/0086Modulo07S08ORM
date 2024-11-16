@@ -92,6 +92,12 @@ createServer(async (request, response) => {
         return request.on("end", async () => {
             body = JSON.parse(body);
             const libro = new Libro(urlParsed.query.id, body.titulo, body.autor, body.anio);
+
+            if(!(await libro.validarActualizacion())) {
+                response.writeHead(409);
+                return response.end(JSON.stringify({message: "Estos datos ya los posee otro libro"}))
+            } 
+
             const [result] = await libro.editar();
             return response.end(JSON.stringify({ message: "Libro editado exitosamente", data: result }))
         })
